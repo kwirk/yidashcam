@@ -42,7 +42,7 @@ folder):
 Also included is two applications:
  * ``python -m yidashcam`` puts the dash camera in a mode to allow live
    streaming from the dash camera.
- * *webapp* hosts a local web app to allow browsing of dash camera's stored
+ * ``pyhon -m webapp`` hosts a local web app to allow browsing of dash camera's stored
    video (requires Flask_).
 
 License
