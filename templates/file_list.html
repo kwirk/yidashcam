@@ -1,0 +1,41 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>YI Dashcam</title>
+    <style>
+        .thumbnail-box {
+            position: relative;
+            display: inline-block;
+            margin: 2px;
+            border: 1px solid #000000;
+        }
+        .thumbnail-box img {
+            vertical-align: bottom;
+        }
+        .thumbnail-box p {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            padding: 1px;
+            font-weight: bold;
+            color: #FFFFFF;
+            background-color: rgba(0,0,0,0.6);
+        }
+    </style>
+</head>
+<body>
+    <h1>YI Dashcam</h1>
+    <p>
+        <a href="/emergency">Emergency</a>
+        <a href="/roadmap">Roadmap</a>
+    </p>
+    {%- set prev_date = none %}
+    {%- for file in file_list|sort(attribute='time', reverse=true) %}
+        {%- if file.time.date() != prev_date %}
+            {%- set prev_date = file.time.date() %}
+            <h3>{{ prev_date|e }}</h3>
+        {%- endif %}
+    <div class="thumbnail-box"><a href="http://192.168.1.254{{ file.url_path|urlencode }}"><img src="/thumbnail{{ file.url_path|urlencode }}"/></a><p>{{ file.time.time()|e }}</p></div>
+    {%- endfor %}
+</body>
+</html>
