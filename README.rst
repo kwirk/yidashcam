@@ -11,16 +11,22 @@ permanent damage to your dash camera and permanent loss of data.
 Requirements
 ============
 The main library requires:
- * `Python >= 3.4 <http://www.python.org/>`_
- * `Requests <http://docs.python-requests.org/en/master/>`_
+
+* `Python >= 3.4 <http://www.python.org/>`_
+* `Requests <http://docs.python-requests.org/en/master/>`_
+
 
 The web application requires:
- * Flask_
+
+* Flask_
+
 
 .. _Flask: http://flask.pocoo.org/
 
 Usage
 =====
+To use, you must connect to your dash camera via WiFi first.
+
 An example of using `yidashcam` (sync emergency clips to current
 folder):
 
@@ -40,10 +46,12 @@ folder):
 
 
 Also included is two applications:
- * ``python -m yidashcam`` puts the dash camera in a mode to allow live
-   streaming from the dash camera.
- * ``pyhon -m webapp`` hosts a local web app to allow browsing of dash camera's stored
-   video (requires Flask_).
+
+* ``python -m yidashcam`` puts the dash camera in a mode to allow live
+  streaming from the dash camera.
+* ``pyhon -m webapp`` hosts a local web app to allow browsing of dash
+  camera's stored video (requires Flask_).
+
 
 License
 =======
