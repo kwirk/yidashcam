@@ -59,10 +59,12 @@ the current folder):
                 local_file.write(data)
 
 
-Also included is two applications:
+Also included is three applications:
 
-* ``python -m yidashcam`` puts the dash camera in a mode to allow live
+* ``python -m yidashcam stream`` puts the dash camera in a mode to allow live
   streaming from the dash camera.
+* ``python -m yidashcam snapshot`` takes a photo with the dashcam and saves it in
+  current directory.
 * ``python -m webapp`` hosts a local web app to allow browsing of dash
   camera's stored video (requires Flask_).
 
