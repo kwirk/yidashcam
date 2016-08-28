@@ -47,8 +47,7 @@ class Command(enum.IntEnum):
     file_thumbnail = 4001
     mode = 3001
     take_photo = 1001
-    video_start = 2002
-    video_stop = 2001
+    video_record = 2001
 
 
 @enum.unique
@@ -381,8 +380,8 @@ class YIDashcam():
         """Start video recording"""
         if self.mode != Mode.video:
             self.set_mode(Mode.video)
-        self._send_cmd(Command.video_stop, par=1)
+        self._send_cmd(Command.video_record, par=1)
 
     def stop_record(self):
         """Stop video recording"""
-        self._send_cmd(Command.video_stop, par=0)
+        self._send_cmd(Command.video_record, par=0)
