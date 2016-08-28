@@ -27,8 +27,7 @@ Usage
 =====
 To use, you must connect to your dash camera via WiFi first.
 
-An example of using `yidashcam` (sync emergency clips to current
-folder):
+An example of using `yidashcam` (sync emergency clips to current folder):
 
 .. code-block:: python
 
@@ -43,6 +42,21 @@ folder):
                 with open(emr_file.name, 'wb') as local_file:
                     for data in yi.get_file(emr_file):
                         local_file.write(data)
+
+Another example (setting a config value, taking a photo and downloading it to
+the current folder):
+
+.. code-block:: python
+
+    import yidashcam
+
+    with yidashcam.YIDashcam() as yi:
+        yi.set_config(yidashcam.config.Option.photo_resolution,
+                      yidashcam.config.PhotoResolution.r1920x1080)
+        photo = yi.take_photo()
+        with open(photo.name, 'wb') as local_file:
+            for data in yi.get_file(photo):
+                local_file.write(data)
 
 
 Also included is two applications:
