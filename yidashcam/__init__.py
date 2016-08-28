@@ -11,9 +11,12 @@ import socket
 import threading
 import weakref
 from collections import namedtuple, OrderedDict
+from operator import attrgetter
 from xml.etree import ElementTree as ET
 
 import requests
+
+from . import config
 
 _LOG = logging.getLogger(__name__)
 
@@ -43,52 +46,17 @@ class Command(enum.IntEnum):
     file_list = 3015
     file_thumbnail = 4001
     mode = 3001
-
-    def __str__(self):
-        """Return value string for URL parameters"""
-        return str(self.value)
+    take_photo = 1001
+    video_start = 2002
+    video_stop = 2001
 
 
 @enum.unique
 class Mode(enum.IntEnum):
     """Dashcam modes"""
-    stream = 1
+    photo = 0
+    video = 1
     file = 2
-
-    def __str__(self):
-        """Return value string for URL parameters"""
-        return str(self.value)
-
-
-@enum.unique
-class Config(enum.IntEnum):
-    """Dashcam config options"""
-    firmware_version = 3012
-    model = 3035
-    serial_number = 3037
-    # TODO = 1002
-    # TODO = 2002
-    # TODO = 2003
-    # TODO = 2004
-    # TODO = 2005
-    # TODO = 2006
-    # TODO = 2007
-    # TODO = 2008
-    # TODO = 2011
-    # TODO = 2012
-    # TODO = 2016
-    # TODO = 2020
-    # TODO = 2030
-    # TODO = 2031
-    # TODO = 2040
-    # TODO = 2050
-    # TODO = 2051
-    # TODO = 3007
-    # TODO = 3008
-    # TODO = 3009
-    # TODO = 3032
-    # TODO = 3033
-    # TODO = 3041
 
 
 class YIDashcamFile(
@@ -111,7 +79,7 @@ class YIDashcam():
     """Class to interact with Xiaomi YI Dashcam"""
     HOST = "192.168.1.254"
 
-    def __init__(self, connect=True, mode=Mode.stream):
+    def __init__(self, connect=True, mode=Mode.video):
         self._config = None
         self._file_list = None
         self._mode = None
@@ -128,7 +96,7 @@ class YIDashcam():
     def __exit__(self, exc_type, exc_value, traceback):
         self.disconnect()
 
-    def _send_cmd(self, cmd, path="/", stream=False, **kwargs):
+    def _send_cmd(self, cmd, path="/", stream=False, par=None, **kwargs):
         """Send a command to the dashcam"""
         if not self.connected and cmd not in (Command.connect, Command.mode):
             raise YIDashcamException("Dashcam not connected")
@@ -136,7 +104,9 @@ class YIDashcam():
         params = OrderedDict()  # Order of parameters is important
         if cmd >= 0:
             params['custom'] = 1  # Must be first!
-            params['cmd'] = cmd
+            params['cmd'] = int(cmd)
+        if par is not None:
+            params['par'] = int(par)
         params.update(kwargs)
         url = "http://{}/{}".format(self.HOST, path.lstrip("/"))
         try:
@@ -167,7 +137,12 @@ class YIDashcam():
                     raise YIDashcamException("Bad status returned: {}".format(
                         status))
                 res_str = res_xml.find("String")
-                return res_str.text if res_str is not None else res_status.text
+                if res_str is not None:
+                    return res_str.text
+                res_value = res_xml.find("Value")
+                if res_value is not None:
+                    return res_value.text
+                return res_status.text
         elif res.headers.get('content-type') == "text/html":
             res_html = ET.fromstring(res.text)
             res_title = res_html.find("head/title")
@@ -212,7 +187,7 @@ class YIDashcam():
         if self._mode == Mode.file:
             self._file_list = None  # Cache now potentially wrong
 
-    def connect(self, mode=Mode.stream):
+    def connect(self, mode=Mode.video):
         """Connect to dashcam"""
         if self.connected:
             raise YIDashcamException("Already connected")
@@ -277,31 +252,51 @@ class YIDashcam():
             for cmd_et, status_et in zip(
                     config_et.iter('Cmd'), config_et.iter('Status')):
                 try:
-                    cmd = Config(int(cmd_et.text))
+                    option = config.Option(int(cmd_et.text))
                 except ValueError:
                     _LOG.debug("Config option %s not recognised", cmd_et.text)
                 else:
                     try:
-                        status = int(status_et.text)
+                        value = int(status_et.text)
                     except ValueError:
-                        status = status_et.text
-                    self._config[cmd] = status
+                        value = status_et.text
+                    self._config[option] = config.option_map[option](value)
         return self._config.copy()
+
+    def set_config(self, option, value):
+        """Set a configuration option on the dashcam
+
+        Many options can't changed without being in "video" mode with recording
+        stopped, so method will do this first"""
+        try:
+            value = config.option_map[option](value)
+        except KeyError:
+            raise ValueError("Not a valid config option: {}".format(option))
+        except ValueError:
+            raise ValueError("Invalid value for config option: {}: {}".format(
+                option, value))
+        if self.mode != Mode.video:
+            # Must be in "video" mode to change (most) config options
+            self.set_mode(Mode.video)
+            # and also stopped
+            self.stop_record()
+        self._send_cmd(option, par=value)
+        self._config = None  # Cache now incorrect
 
     @property
     def firmware_version(self):
         """Firmware version on dash cam"""
-        return self.config[Config.firmware_version]
+        return self.config[config.Option.firmware_version]
 
     @property
     def model(self):
         """Model name of dashcam"""
-        return self.config[Config.model]
+        return self.config[config.Option.model]
 
     @property
     def serial_number(self):
         """Serial number of dash cam"""
-        return self.config[Config.serial_number]
+        return self.config[config.Option.serial_number]
 
     def set_clock(self, date_time=None):
         """Set clock on dashcam to specified time (default: 'now')"""
@@ -373,3 +368,21 @@ class YIDashcam():
             pass
         self._send_cmd(Command.file_delete, str=path)
         self._file_list = None  # Cache now wrong
+
+    def take_photo(self):
+        """Capture photo from camera"""
+        if self.mode != Mode.photo:
+            self.set_mode(Mode.photo)
+        self._send_cmd(Command.take_photo)
+        self._file_list = None  # Cache now wrong
+        return sorted(self.photo_list, key=attrgetter('time'), reverse=True)[0]
+
+    def start_record(self):
+        """Start video recording"""
+        if self.mode != Mode.video:
+            self.set_mode(Mode.video)
+        self._send_cmd(Command.video_stop, par=1)
+
+    def stop_record(self):
+        """Stop video recording"""
+        self._send_cmd(Command.video_stop, par=0)
