@@ -320,25 +320,30 @@ class YIDashcam():
             files_et = ET.fromstring(self._send_cmd(Command.file_list))
             self._file_list = [
                 YIDashcamFile(
-                    file_.find("NAME").text, file_.find("FPATH").text,
-                    int(file_.find("SIZE").text), datetime.datetime.strptime(
-                        file_.find("TIME").text, "%Y/%m/%d %H:%M:%S"),
-                    bool(int(file_.find("ATTR").text) & 1))
-                for file_ in files_et.iter("File")
+                    file.find("NAME").text, file.find("FPATH").text,
+                    int(file.find("SIZE").text), datetime.datetime.strptime(
+                        file.find("TIME").text, "%Y/%m/%d %H:%M:%S"),
+                    bool(int(file.find("ATTR").text) & 1))
+                for file in files_et.iter("File")
             ]
         return self._file_list.copy()
 
     @property
     def roadmap_list(self):
         """List of files from "roadmap" folder on dashcam SD Card"""
-        return [file_ for file_ in self.file_list
-                if "movie" in file_.path.lower()]
+        return [file for file in self.file_list
+                if "movie" in file.path.lower()]
 
     @property
     def emergency_list(self):
         """List of files from "emergency" folder on dashcam SD Card"""
-        return [file_ for file_ in self.file_list
-                if "emr" in file_.path.lower()]
+        return [file for file in self.file_list if "emr" in file.path.lower()]
+
+    @property
+    def photo_list(self):
+        """List of files from photo folder on dashcam SD Card"""
+        return [file for file in self.file_list
+                if "photo" in file.path.lower()]
 
     def get_thumbnail(self, path):
         """Get a thumbnail for specified file on dashcam SD Card
@@ -367,4 +372,4 @@ class YIDashcam():
         except AttributeError:
             pass
         self._send_cmd(Command.file_delete, str=path)
-        self._file_list = None  # Cache now potentially wrong
+        self._file_list = None  # Cache now wrong
