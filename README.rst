@@ -49,7 +49,7 @@ Also included is two applications:
 
 * ``python -m yidashcam`` puts the dash camera in a mode to allow live
   streaming from the dash camera.
-* ``pyhon -m webapp`` hosts a local web app to allow browsing of dash
+* ``python -m webapp`` hosts a local web app to allow browsing of dash
   camera's stored video (requires Flask_).
 
 
