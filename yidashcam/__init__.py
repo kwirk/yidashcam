@@ -111,13 +111,13 @@ class YIDashcam():
     """Class to interact with Xiaomi YI Dashcam"""
     HOST = "192.168.1.254"
 
-    def __init__(self, connect=True):
+    def __init__(self, connect=True, mode=Mode.stream):
         self._config = None
         self._file_list = None
         self._mode = None
         self._heartbeat_timer = None
         if connect:
-            self.connect()
+            self.connect(mode)
 
     def __del__(self):
         self.disconnect()
@@ -212,10 +212,12 @@ class YIDashcam():
         if self._mode == Mode.file:
             self._file_list = None  # Cache now potentially wrong
 
-    def connect(self):
+    def connect(self, mode=Mode.stream):
         """Connect to dashcam"""
         if self.connected:
             raise YIDashcamException("Already connected")
+        if mode not in Mode:
+            raise ValueError("Invalid mode")
 
         try:
             self._send_cmd(Command.connect)
@@ -232,7 +234,7 @@ class YIDashcam():
 
         self._config = None
         self._file_list = None
-        self.set_mode(Mode.stream)
+        self.set_mode(mode)
         _LOG.debug("Connected to dashcam")
 
     def disconnect(self):
