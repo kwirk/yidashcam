@@ -11,7 +11,6 @@ import socket
 import threading
 import weakref
 from collections import namedtuple, OrderedDict
-from operator import attrgetter
 from xml.etree import ElementTree as ET
 
 import requests
@@ -48,6 +47,11 @@ class Command(enum.IntEnum):
     mode = 3001
     take_photo = 1001
     video_record = 2001
+    video_seconds_left = 2009
+    video_state = 2016
+    video_stream = 2015  # par=0 or 1 to toggle off and on
+    video_photo = 2017
+    video_emergency = 2019
 
 
 @enum.unique
@@ -274,11 +278,14 @@ class YIDashcam():
         except ValueError:
             raise ValueError("Invalid value for config option: {}: {}".format(
                 option, value))
+
         if self.mode != Mode.video:
             # Must be in "video" mode to change (most) config options
             self.set_mode(Mode.video)
+        if self.recording:
             # and also stopped
             self.stop_record()
+
         self._send_cmd(option, par=value)
         self._config = None  # Cache now incorrect
 
@@ -369,12 +376,15 @@ class YIDashcam():
         self._file_list = None  # Cache now wrong
 
     def take_photo(self):
-        """Capture photo from camera"""
+        """Capture photo with camera"""
         if self.mode != Mode.photo:
             self.set_mode(Mode.photo)
         self._send_cmd(Command.take_photo)
         self._file_list = None  # Cache now wrong
-        return sorted(self.photo_list, key=attrgetter('time'), reverse=True)[0]
+
+    @property
+    def recording(self):
+        return bool(int(self._send_cmd(Command.video_state)))
 
     def start_record(self):
         """Start video recording"""
@@ -385,3 +395,15 @@ class YIDashcam():
     def stop_record(self):
         """Stop video recording"""
         self._send_cmd(Command.video_record, par=0)
+
+    def take_video_photo(self):
+        """Save photo from active recording"""
+        if not self.recording:
+            raise YIDashcamException(
+                "Can't take video image when not recording")
+        self._send_cmd(Command.video_photo)
+
+    def take_emergency_clip(self):
+        if self.mode != Mode.video:
+            self.set_mode(Mode.video)
+        self._send_cmd(Command.video_emergency)

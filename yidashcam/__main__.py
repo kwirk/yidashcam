@@ -20,7 +20,8 @@ with YIDashcam() as yi:
             pass
     elif sys.argv[1].lower() == "snapshot":
         yi.set_config(Option.photo_resolution, PhotoResolution.r1920x1080)
-        photo = yi.take_photo()
+        yi.take_photo()
+        photo = sorted(yi.photo_list)[-1]
         with open(photo.name, 'wb') as local_file:
             for data in yi.get_file(photo):
                 local_file.write(data)
