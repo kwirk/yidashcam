@@ -404,6 +404,7 @@ class YIDashcam():
         self._send_cmd(Command.video_photo)
 
     def take_emergency_clip(self):
+        """Take a "emergency" clip"""
         if self.mode != Mode.video:
             self.set_mode(Mode.video)
         self._send_cmd(Command.video_emergency)
