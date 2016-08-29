@@ -6,30 +6,26 @@ import enum
 @enum.unique
 class Option(enum.IntEnum):
     """Dashcam config options"""
+    adas = 2031
     audio = 2007
     exposure = 2005
     firmware_version = 3012
     gsensor = 2011
+    language = 3008
     model = 3035
     photo_resolution = 1002
     serial_number = 3037
-    timestamp = 2008
+    standby_clock = 2050
+    video_auto_start = 2012
     video_length = 2003
+    video_logo = 2040
     video_resolution = 2002
+    video_timestamp = 2008
 
-    # TODO = 2004
-    # TODO = 2005
-    # TODO = 2006
-    # TODO = 2012
-    # TODO = 2016
     # TODO = 2020
     # TODO = 2030
-    # TODO = 2031
-    # TODO = 2040
-    # TODO = 2050
     # TODO = 2051
     # TODO = 3007
-    # TODO = 3008
     # TODO = 3009
     # TODO = 3032
     # TODO = 3033
@@ -38,6 +34,7 @@ class Option(enum.IntEnum):
 
 @enum.unique
 class Exposure(enum.IntEnum):
+    """Dashcam exposure values"""
     pos2 = 0
     pos5_3 = 1
     pos4_3 = 2
@@ -59,6 +56,21 @@ class GSensor(enum.IntEnum):
     low = 0
     medium = 1
     high = 2
+
+
+@enum.unique
+class Language(enum.IntEnum):
+    """Dashcam UI language"""
+    chinese_simplified = 6
+    chinese_traditional = 7
+    english = 0
+    french = 1
+    german = 4
+    italian = 5
+    japanese = 9
+    portuguese = 3
+    russian = 8
+    spanish = 2
 
 
 @enum.unique
@@ -92,16 +104,21 @@ class VideoResolution(enum.IntEnum):
 
 
 option_map = {
+    Option.adas: bool,
     Option.audio: bool,
     Option.exposure: Exposure,
     Option.firmware_version: str,
     Option.gsensor: GSensor,
+    Option.language: Language,
     Option.model: str,
     Option.photo_resolution: PhotoResolution,
     Option.serial_number: str,
-    Option.timestamp: bool,
+    Option.standby_clock: bool,
+    Option.video_auto_start: bool,
     Option.video_length: VideoLength,
+    Option.video_logo: bool,
     Option.video_resolution: VideoResolution,
+    Option.video_timestamp: bool,
 }
 
 assert set(Option) == set(option_map)
