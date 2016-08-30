@@ -1,30 +1,99 @@
 #!/usr/bin/env python
-"""Put YI Dashcam in stream mode"""
+"""Command line tool for interaction with YI Dashcam"""
 
-import sys
+import argparse
+import enum
 import time
 
-from . import YIDashcam
-from .config import Option, PhotoResolution
+from . import __version__, YIDashcam
+from .config import Option, option_map, PhotoResolution
+
+
+def format_config(option, value):
+    return "{0}: {1}".format(
+        option.name.replace("_", " ").title(),
+        value.name.replace("_", " ").title()
+        if hasattr(value, 'name') else value)
+
+
+parser = argparse.ArgumentParser(prog=YIDashcam.__module__)
+parser.add_argument(
+    '--version', action='version', version='%(prog)s v{}'.format(__version__))
+subparsers = parser.add_subparsers(
+    title="Commands", dest='command', metavar='COMMAND')
+
+#  Config
+parser_config = subparsers.add_parser(
+    'config', help='camera information and configuration')
+subparsers_config = parser_config.add_subparsers(
+    title="Config options", dest='option', metavar='')
+for option, val_type in sorted(option_map.items(), key=lambda x: x[0].name):
+    if val_type is str:
+        continue
+    parser_option = subparsers_config.add_parser(
+        option.name, help=option.name.replace('_', ' ').title())
+    if issubclass(val_type, enum.Enum):
+        parser_option.add_argument(
+            'value', choices=[value.name for value in val_type])
+    elif val_type is bool:
+        parser_option.add_argument(
+            'value', type=str.lower, choices=['true', 'false'])
+
+#  Video stream
+parser_stream = subparsers.add_parser(
+    'stream', help='put dashcam in mode to stream video')
+
+#  Photo capture
+parser_snapshot = subparsers.add_parser(
+    'snapshot', help='take a photo with the dashcam')
+parser_snapshot.add_argument(
+    '-r',
+    dest='photo_resolution',
+    choices=[res.name for res in PhotoResolution],
+    help="photo resolution (default: dashcam current setting)")
+parser_snapshot.add_argument(
+    '-o',
+    dest='output_filename',
+    metavar="FILE",
+    help="output file to save image (default: filename on camera)")
+
+args = parser.parse_args()
 
 with YIDashcam() as yi:
-    print("Model: {0.model}\n"
-          "Serial Number: {0.serial_number}\n"
-          "Firmware Version: {0.firmware_version}".format(yi))
-    if len(sys.argv) <= 1 or sys.argv[1].lower() == "stream":
+    if args.command is None or args.command == "config":
+        if getattr(args, 'option', None) is not None:
+            option = Option[args.option]
+            val_type = option_map[option]
+            if issubclass(val_type, enum.Enum):
+                yi.set_config(option, val_type[args.value])
+            elif val_type is bool:
+                yi.set_config(option, args.value.lower() == "true")
+            time.sleep(0.1)  #  Need a chance for config to set...
+            print(format_config(option, yi.config[option]))
+        else:
+            print(
+                *[format_config(option, value)
+                  for option, value in sorted(
+                      yi.config.items(), key=lambda x: x[0].name)],
+                sep="\n")
+    elif args.command == "stream":
         print("Connect to video stream at: rtsp://{0.HOST}/xxx.mov".format(yi))
         try:
             while yi.connected:
                 time.sleep(0.1)
         except KeyboardInterrupt:
             pass
-    elif sys.argv[1].lower() == "snapshot":
-        yi.set_config(Option.photo_resolution, PhotoResolution.r1920x1080)
+    elif args.command == "snapshot":
+        if args.photo_resolution is not None:
+            yi.set_config(Option.photo_resolution,
+                          PhotoResolution[args.photo_resolution])
         yi.take_photo()
         photo = sorted(yi.photo_list)[-1]
-        with open(photo.name, 'wb') as local_file:
+        if args.output_filename is None:
+            output_filename = photo.name
+        else:
+            output_filename = args.output_filename
+        with open(output_filename, 'wb') as output_file:
             for data in yi.get_file(photo):
-                local_file.write(data)
-        print("Snapshot save to: {0.name}".format(photo))
-    else:
-        print("Unknown command: {}".format(sys.argv[1]))
+                output_file.write(data)
+        print("Snapshot saved to: {}".format(output_filename))

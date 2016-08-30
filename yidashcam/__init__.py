@@ -1,7 +1,7 @@
 """Unofficial module for interacting with Xiaomi YI Dashcam"""
 
 __author__ = "Steven Hiscocks"
-__version__ = "0.2"
+__version__ = "0.3"
 
 import datetime
 import enum
@@ -384,6 +384,7 @@ class YIDashcam():
 
     @property
     def recording(self):
+        """Is the dashcam actively recording"""
         return bool(int(self._send_cmd(Command.video_state)))
 
     def start_record(self):
