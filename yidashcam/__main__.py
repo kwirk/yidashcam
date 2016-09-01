@@ -68,11 +68,12 @@ with YIDashcam() as yi:
         if getattr(args, 'option', None) is not None:
             option = Option[args.option]
             val_type = option_map[option]
+            time.sleep(1)  #  Need a chance for dashcam to settle...
             if issubclass(val_type, enum.Enum):
                 yi.set_config(option, val_type[args.value])
             elif val_type is bool:
                 yi.set_config(option, args.value.lower() == "true")
-            time.sleep(0.1)  #  Need a chance for config to set...
+            time.sleep(1)  #  Need a chance for config to set...
             print(format_config(option, yi.config[option]))
         else:
             print(

@@ -1,7 +1,7 @@
 """Unofficial module for interacting with Xiaomi YI Dashcam"""
 
 __author__ = "Steven Hiscocks"
-__version__ = "0.3"
+__version__ = "0.3.1"
 
 import datetime
 import enum
@@ -9,6 +9,7 @@ import logging
 import ntpath
 import socket
 import threading
+import time
 import weakref
 from collections import namedtuple, OrderedDict
 from xml.etree import ElementTree as ET
@@ -282,9 +283,9 @@ class YIDashcam():
         if self.mode != Mode.video:
             # Must be in "video" mode to change (most) config options
             self.set_mode(Mode.video)
-        if self.recording:
-            # and also stopped
+        while self.recording:
             self.stop_record()
+            time.sleep(0.1)
 
         self._send_cmd(option, par=value)
         self._config = None  # Cache now incorrect
