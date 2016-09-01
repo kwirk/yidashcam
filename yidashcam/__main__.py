@@ -3,6 +3,7 @@
 
 import argparse
 import enum
+import sys
 import time
 
 from . import __version__, YIDashcam
@@ -57,6 +58,9 @@ parser_snapshot.add_argument(
     metavar="FILE",
     help="output file to save image (default: filename on camera)")
 
+if sys.argv[-2] == "exposure" :
+    #  Allow negative values for exposure
+    sys.argv.insert(len(sys.argv) - 1, "--")
 args = parser.parse_args()
 
 with YIDashcam() as yi:
