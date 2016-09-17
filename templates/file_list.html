@@ -38,5 +38,13 @@
         {%- endif %}
     <div class="thumbnail-box"><a href="http://192.168.1.254{{ file.url_path|urlencode }}"><img src="/thumbnail{{ file.url_path|urlencode }}"/></a><p>{{ file.time.time()|e }}</p></div>
     {%- endfor %}
+    <div style='text-align: center;'>
+    {%- if pagination.has_prev %}
+    <a href="{{ url_for_other_page(pagination.page - 1) }}">&laquo; Previous</a>
+    {%- endif %}
+    {%- if pagination.has_next %}
+    <a href="{{ url_for_other_page(pagination.page + 1) }}">Next &raquo;</a>
+    {%- endif %}
+    </div>
 </body>
 </html>
