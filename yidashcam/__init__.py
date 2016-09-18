@@ -42,17 +42,18 @@ class Command(enum.IntEnum):
     connect = 8001
     disconnect = 8002
     file_delete = 4003
+    file_force_delete = 4009
     file_get = -1  # Not really a command...
     file_list = 3015
     file_thumbnail = 4001
     mode = 3001
     take_photo = 1001
+    video_emergency = 2019
+    video_photo = 2017
     video_record = 2001
     video_seconds_left = 2009
     video_state = 2016
     video_stream = 2015  # par=0 or 1 to toggle off and on
-    video_photo = 2017
-    video_emergency = 2019
 
 
 @enum.unique
@@ -367,13 +368,17 @@ class YIDashcam():
             path = YIDashcamFile._url_path(path)
         yield from self._send_cmd(Command.file_get, path, stream=True)
 
-    def delete_file(self, path):
+    def delete_file(self, path, force=False):
         """Delete specified file from the dashcam SD Card"""
         try:
             path = path.path
         except AttributeError:
             pass
-        self._send_cmd(Command.file_delete, str=path)
+        if force:
+            # Force delete for emergency files
+            self._send_cmd(Command.file_force_delete, str=path)
+        else:
+            self._send_cmd(Command.file_delete, str=path)
         self._file_list = None  # Cache now wrong
 
     def take_photo(self):
