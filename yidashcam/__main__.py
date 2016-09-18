@@ -58,6 +58,10 @@ parser_snapshot.add_argument(
     metavar="FILE",
     help="output file to save image (default: filename on camera)")
 
+# Web Application
+parser_config = subparsers.add_parser(
+    'webapp', help='host local web app to view dashcam videos')
+
 if sys.argv[-2] == "exposure":
     #  Allow negative values for exposure
     sys.argv.insert(len(sys.argv) - 1, "--")
@@ -102,3 +106,7 @@ with YIDashcam() as yi:
             for data in yi.get_file(photo):
                 output_file.write(data)
         print("Snapshot saved to: {}".format(output_filename))
+    elif args.command == "webapp":
+        from .webapp import app
+        app.yi = yi
+        app.run()

@@ -62,7 +62,10 @@ app.jinja_env.globals['url_for_other_page'] = url_for_other_page
 @app.before_first_request
 def connect_yi():
     global yi
-    yi = yidashcam.YIDashcam(mode=yidashcam.Mode.file)
+    if yi is None:
+        yi = yidashcam.YIDashcam(mode=yidashcam.Mode.file)
+    elif yi.mode != yidashcam.Mode.file:
+        yi.set_mode(yidashcam.Mode.file)
 
 
 def get_yi():
@@ -129,9 +132,3 @@ def config():
         'config.html',
         config=get_yi().config,
         option_map=yidashcam.config.option_map)
-
-
-if __name__ == "__main__":
-    app.run()
-    if yi is not None:
-        yi.disconnect()

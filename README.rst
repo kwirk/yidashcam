@@ -68,8 +68,8 @@ Also included is four applications:
   streaming from the dash camera.
 * ``python -m yidashcam snapshot`` takes a photo with the dashcam and saves it
   in current directory or specified file.
-* ``python -m webapp`` hosts a local web app to allow browsing of dash
-  camera's stored video (requires Flask_).
+* ``python -m yidashcam webapp`` hosts a local web app to allow browsing of
+  dashcam's stored video (requires Flask_).
 
 
 License
