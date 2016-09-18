@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from math import ceil
+import time
 
 from flask import Flask, Response, abort, render_template, request, url_for
 
@@ -111,10 +112,23 @@ def thumbnail(path):
         mimetype='image/jpeg')
 
 
-@app.route('/config')
+@app.route('/config', methods=["GET", "POST"])
 def config():
     """Page to interact with dashcam config"""
-    return render_template('config.html', config=get_yi().config)
+    if request.method == "POST":
+        cur_config = get_yi().config
+        for option, type_ in yidashcam.config.option_map.items():
+            if type_ is str:
+                continue
+            value = int(request.form.get(option.name, 0))
+            if value != cur_config[option]:
+                get_yi().set_config(option, value)
+        get_yi().set_mode(yidashcam.Mode.file)
+        time.sleep(0.5) # Allow settings to settle in
+    return render_template(
+        'config.html',
+        config=get_yi().config,
+        option_map=yidashcam.config.option_map)
 
 
 if __name__ == "__main__":

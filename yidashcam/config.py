@@ -52,20 +52,20 @@ class Option(enum.IntEnum):
 
 class Exposure(enum.IntEnum, metaclass=_ExposureEnumMeta):
     """Dashcam exposure values"""
-    pos_2 = 0
-    pos_5_3 = 1
-    pos_4_3 = 2
-    pos_1 = 3
-    pos_2_3 = 4
-    pos_1_3 = 5
+    neg_2 = 12
+    neg_5_3 = 11
+    neg_4_3 = 10
+    neg_1 = 9
+    neg_2_3 = 8
+    neg_1_3 = 7
     pos_0 = 6  # Default and auto
     auto = 6
-    neg_1_3 = 7
-    neg_2_3 = 8
-    neg_1 = 9
-    neg_4_3 = 10
-    neg_5_3 = 11
-    neg_2 = 12
+    pos_1_3 = 5
+    pos_2_3 = 4
+    pos_1 = 3
+    pos_4_3 = 2
+    pos_5_3 = 1
+    pos_2 = 0
 
     @DynamicClassAttribute
     def name(self):
