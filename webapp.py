@@ -22,7 +22,7 @@ class Pagination(object):
 
     @property
     def pages(self):
-        return int(ceil(self.total_count / float(self.per_page)))
+        return ceil(self.total_count / self.per_page)
 
     @property
     def has_prev(self):
@@ -33,18 +33,19 @@ class Pagination(object):
         return self.page < self.pages
 
     @property
-    def start_index(self):
+    def first_item_index(self):
         return (self.page - 1) * self.per_page
 
     @property
-    def last_index(self):
+    def last_item_index(self):
         if self.page == self.pages:
             return self.total_count
         else:
             return self.page * self.per_page
 
     def page_items(self, items):
-        return items[self.start_index:self.last_index]
+        """Return list of items on current page from `items`"""
+        return items[self.first_item_index:self.last_item_index]
 
 
 def url_for_other_page(page):
