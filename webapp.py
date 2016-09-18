@@ -111,6 +111,12 @@ def thumbnail(path):
         mimetype='image/jpeg')
 
 
+@app.route('/config')
+def config():
+    """Page to interact with dashcam config"""
+    return render_template('config.html', config=get_yi().config)
+
+
 if __name__ == "__main__":
     app.run()
     if yi is not None:

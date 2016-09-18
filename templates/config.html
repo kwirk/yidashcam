@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Configuration{% endblock %}
+{%- block head %}{{ super() }}
+{%- endblock head %}
+{%- block body %}{{ super() }}
+    {%- for option, value in config.items()|sort(attribute='0.name') %}
+    <p>{{ option|attr("name")|replace("_", " ")|title|e }}:&nbsp;
+    {%- if value.name -%}
+        {{ value|attr("name")|replace("_", " ")|title|e }}
+    {%- else -%}
+        {{ value|e }}
+    {%- endif -%}
+    </p>
+    {%- endfor %}
+{%- endblock body %}
