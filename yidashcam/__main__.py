@@ -58,7 +58,7 @@ parser_snapshot.add_argument(
     metavar="FILE",
     help="output file to save image (default: filename on camera)")
 
-if sys.argv[-2] == "exposure" :
+if sys.argv[-2] == "exposure":
     #  Allow negative values for exposure
     sys.argv.insert(len(sys.argv) - 1, "--")
 args = parser.parse_args()
