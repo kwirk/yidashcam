@@ -1,0 +1,21 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    {%- block head %}
+    <title>YI Dashcam - {% block title %}{% endblock %}</title>
+    {%- endblock head %}
+</head>
+<body>
+{%- block body %}
+    <h1>YI Dashcam</h1>
+    <h2>{{ self.title() }}</h2>
+    <p>
+        <a href="/emergency">Emergency</a>
+        <a href="/roadmap">Roadmap</a>
+        <a href="/photo">Photos</a>
+        <a href="/config">Configuration</a>
+    </p>
+{%- endblock body %}
+</body>
+</html>
+

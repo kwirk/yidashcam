@@ -1,8 +1,7 @@
-<!DOCTYPE HTML>
-<html>
-<head>
-    <title>YI Dashcam</title>
-    <style>
+{% extends "base.html" %}
+{% block title %}{{ file_type|title|e }} File List{% endblock %}
+{%- block head %}{{ super() }}
+    <style type="text/css">
         .thumbnail-box {
             position: relative;
             display: inline-block;
@@ -22,29 +21,22 @@
             background-color: rgba(0,0,0,0.6);
         }
     </style>
-</head>
-<body>
-    <h1>YI Dashcam</h1>
-    <p>
-        <a href="/emergency">Emergency</a>
-        <a href="/roadmap">Roadmap</a>
-        <a href="/photo">Photos</a>
-    </p>
+{%- endblock head %}
+{%- block body %}{{ super() }}
     {%- set prev_date = none %}
     {%- for file in file_list|sort(attribute='time', reverse=true) %}
         {%- if file.time.date() != prev_date %}
             {%- set prev_date = file.time.date() %}
             <h3>{{ prev_date|e }}</h3>
         {%- endif %}
-    <div class="thumbnail-box"><a href="http://192.168.1.254{{ file.url_path|urlencode }}"><img src="/thumbnail{{ file.url_path|urlencode }}"/></a><p>{{ file.time.time()|e }}</p></div>
+        <div class="thumbnail-box"><a href="http://192.168.1.254{{ file.url_path|urlencode }}"><img src="/thumbnail{{ file.url_path|urlencode }}"/></a><p>{{ file.time.time()|e }}</p></div>
     {%- endfor %}
     <div style='text-align: center; font-size: large; font-weight: bold;'>
     {%- if pagination.has_prev %}
-    <a href="{{ url_for_other_page(pagination.page - 1) }}">&laquo; Previous</a>
+        <a href="{{ url_for_other_page(pagination.page - 1) }}">&laquo; Previous</a>
     {%- endif %}
     {%- if pagination.has_next %}
-    <a href="{{ url_for_other_page(pagination.page + 1) }}">Next &raquo;</a>
+        <a href="{{ url_for_other_page(pagination.page + 1) }}">Next &raquo;</a>
     {%- endif %}
     </div>
-</body>
-</html>
+{%- endblock body %}
