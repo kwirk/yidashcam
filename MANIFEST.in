@@ -1,0 +1,3 @@
+recursive-include flask_bootstrap/templates *.html
+recursive-include doc *
+include README.rst
