@@ -62,7 +62,7 @@ parser_snapshot.add_argument(
 parser_config = subparsers.add_parser(
     'webapp', help='host local web app to view dashcam videos')
 
-if sys.argv[-2] == "exposure":
+if "exposure" in sys.argv:
     #  Allow negative values for exposure
     sys.argv.insert(len(sys.argv) - 1, "--")
 args = parser.parse_args()
