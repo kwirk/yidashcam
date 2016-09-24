@@ -1,42 +1,75 @@
 {% extends "base.html" %}
-{% block title %}{{ file_type|title|e }} File List{% endblock %}
-{%- block head %}{{ super() }}
-    <style type="text/css">
-        .thumbnail-box {
-            position: relative;
-            display: inline-block;
-            margin: 2px;
-            border: 1px solid #000000;
-        }
-        .thumbnail-box img {
-            vertical-align: bottom;
-        }
-        .thumbnail-box p {
-            position: absolute;
-            right: 0;
-            bottom: 0;
-            padding: 1px;
-            font-weight: bold;
-            color: #FFFFFF;
-            background-color: rgba(0,0,0,0.6);
-        }
-    </style>
-{%- endblock head %}
-{%- block body %}{{ super() }}
+{%- block styles -%}{{ super() }}
+<style type="text/css">
+    .thumbnail_delete {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        padding: 1px;
+    }
+    .delete_submit {
+        background: none;
+        border: none;
+        padding: 0;
+    }
+    .custom_caption {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        padding: 1px;
+        font-weight: bold;
+        color: #FFFFFF;
+        background-color: rgba(0, 0, 0, 0.6);
+    }
+    .thumbnail {
+        position: relative;
+    }
+</style>
+{%- endblock styles -%}
+{%- block content -%}
+<div class="container-fluid">
+    {%- if not file_list -%}
+    <h1 class="text-center"><span class="glyphicon glyphicon-folder-open" style="color:crimson"></span><br>No {{ file_type|title|e }} Files Found</h1>
+    {%- else -%}
     {%- set prev_date = none %}
-    {%- for file in file_list|sort(attribute='time', reverse=true) %}
+    {%- for file in file_list %}
         {%- if file.time.date() != prev_date %}
+            {%- if prev_date != none -%}</div>{%- endif -%}
             {%- set prev_date = file.time.date() %}
             <h3>{{ prev_date|e }}</h3>
+            <div class="row">
         {%- endif %}
-        <div class="thumbnail-box"><a href="http://192.168.1.254{{ file.url_path|urlencode }}"><img src="/thumbnail{{ file.url_path|urlencode }}"/></a><p>{{ file.time.time()|e }}</p></div>
+        <div class="col-xs-6 col-sm-4 col-md-3"><div class="thumbnail">
+            <a href="http://192.168.1.254{{ file.url_path|urlencode }}"><img src="/thumbnail{{ file.url_path|urlencode }}"/></a>
+            <div class="thumbnail_delete">
+                <form action="/delete{{file.url_path|urlencode }}" method="post" onsubmit="return confirm('Are you sure you want to delete this file?')">
+                    <button class="delete_submit" type="submit"><span class="glyphicon glyphicon-remove-circle" style="color:crimson"></span></button>
+                </form>
+            </div>
+            <div class="custom_caption"><span>{{ file.time.time()|e }}</span></div>
+        </div></div>
     {%- endfor %}
-    <div style='text-align: center; font-size: large; font-weight: bold;'>
-    {%- if pagination.has_prev %}
-        <a href="{{ url_for_other_page(pagination.page - 1) }}">&laquo; Previous</a>
-    {%- endif %}
-    {%- if pagination.has_next %}
-        <a href="{{ url_for_other_page(pagination.page + 1) }}">Next &raquo;</a>
-    {%- endif %}
     </div>
-{%- endblock body %}
+
+    <div class="text-center"><ul class="pagination">
+    {% if pagination.has_prev -%}
+        <li><a href="{{ url_for_other_page(pagination.page - 1) }}">&laquo;</a></li>
+    {%- else -%}
+        <li class="disabled"><span>&laquo;</span></li>
+    {%- endif -%}
+    {% for n in range(1, pagination.pages + 1) %}
+        {% if n == pagination.page -%}
+            <li class="active"><span>{{ n }}</span></li>
+        {%- else -%}
+            <li><a href="{{ url_for_other_page(n) }}">{{ n }}</a></li>
+        {%- endif -%}
+    {% endfor %}
+    {% if pagination.has_next -%}
+        <li><a href="{{ url_for_other_page(pagination.page + 1) }}">&raquo;</a></li>
+    {%- else -%}
+        <li class="disabled"><span>&raquo;</span></li>
+    {%- endif -%}
+    </ul></div>
+    {%- endif -%}
+</div>
+{%- endblock content -%}

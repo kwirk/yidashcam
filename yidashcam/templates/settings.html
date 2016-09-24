@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{%- block content -%}
+<div class="container-fluid">
+    <form method="post"><table class="table">
+    {%- for option, value in settings.items()|sort(attribute='0.name') if value is not string %}
+        <tr><td><label>{{ option|attr("name")|replace("_", " ")|title|e }}</label></td>
+        <td><div class="btn-group" data-toggle="buttons">
+        {%- if option_map[option] is iterable -%} {# Should be Enum #}
+            {% for poss_value in option_map[option] -%}
+                <label class="btn btn-info{% if value == poss_value %} active{% endif %}">
+                <input type="radio" name="{{ option|attr("name")|e }}" value="{{ poss_value|attr("value") }}" autocomplete="off"{% if value == poss_value %} checked{% endif %}>
+                {{ poss_value|attr("name")|replace("_", " ")|title|e }}</label>
+            {% endfor -%}
+        {%- else -%} {# Should be bool #}
+            <label class="btn btn-success{% if value %} active{% endif %}">
+            <input type="radio" name="{{ option|attr("name")|e }}" value="1" autocomplete="off"{% if value %} checked{% endif %}>
+            Enabled</label>
+            <label class="btn btn-danger{% if not value %} active{% endif %}">
+            <input type="radio" name="{{ option|attr("name")|e }}" value="0" autocomplete="off"{% if not value %} checked{% endif %}>
+            Disabled</label>
+        {%- endif -%}
+        </div></td></tr>
+    {%- endfor %}
+    <tr><td colspan="2"><input class="btn btn-primary" type="submit" value="Apply Settings"></td></tr>
+    </table></form>
+</div>
+{%- endblock content -%}

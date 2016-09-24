@@ -1,21 +1,40 @@
-<!DOCTYPE HTML>
-<html>
-<head>
-    {%- block head %}
-    <title>YI Dashcam - {% block title %}{% endblock %}</title>
-    {%- endblock head %}
-</head>
-<body>
-{%- block body %}
-    <h1>YI Dashcam</h1>
-    <h2>{{ self.title() }}</h2>
-    <p>
-        <a href="/emergency">Emergency</a>
-        <a href="/roadmap">Roadmap</a>
-        <a href="/photo">Photos</a>
-        <a href="/config">Configuration</a>
-    </p>
-{%- endblock body %}
-</body>
-</html>
-
+{% extends "bootstrap/base.html" %}
+{%- macro nav_item(item, glyphicon, active) -%}
+    <li class="nav-item{% if active %} active{% endif %}">
+        <a class="nav-link" href="/{{ item|urlencode }}"><span class="glyphicon glyphicon-{{ glyphicon }}" style="color:crimson"></span>&nbsp;{{ item|title|e }}</a>
+    </li>
+{%- endmacro -%}
+{% block title %}YI Dashcam{% endblock %}
+{%- block styles -%}{{ super() }}
+    <style type="text/css">
+        body { padding-top: 70px; }
+    </style>
+{%- endblock styles -%}
+{%- block navbar -%}
+<div class="navbar navbar-default navbar-fixed-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <span class="navbar-brand">YI Dashcam</span>
+        </div>
+        <div class="collapse navbar-collapse" id="navbar">
+            <ul class="nav navbar-nav">
+            {{ nav_item("emergency", "alert", file_type == "emergency") }}
+            {{ nav_item("roadmap", "road", file_type == "roadmap") }}
+            {{ nav_item("photo", "picture", file_type == "photo") }}
+            {{ nav_item("settings", "cog", settings is defined) }}
+            </ul>
+            {%- if serial_number is not none -%}
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="nav-item"><span class="navbar-text" style="font-size: x-small">{{ serial_number|e }} {{ firmware_version }}</span></li>
+                </ul>
+            {%- endif -%}
+        </div>
+    </div>
+</div>
+{%- endblock navbar -%}

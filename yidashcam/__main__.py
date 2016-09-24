@@ -67,8 +67,8 @@ if sys.argv[-2] == "exposure":
     sys.argv.insert(len(sys.argv) - 1, "--")
 args = parser.parse_args()
 
-with YIDashcam() as yi:
-    if args.command is None or args.command == "config":
+if args.command is None or args.command == "config":
+    with YIDashcam() as yi:
         if getattr(args, 'option', None) is not None:
             option = Option[args.option]
             val_type = option_map[option]
@@ -85,15 +85,18 @@ with YIDashcam() as yi:
                   for option, value in sorted(
                       yi.config.items(), key=lambda x: x[0].name)],
                 sep="\n")
-    elif args.command == "stream":
+elif args.command == "stream":
+    with YIDashcam() as yi:
         print("Connect to video stream at: rtsp://{0.HOST}/xxx.mov".format(yi))
         try:
             while yi.connected:
                 time.sleep(0.1)
         except KeyboardInterrupt:
             pass
-    elif args.command == "snapshot":
+elif args.command == "snapshot":
+    with YIDashcam() as yi:
         if args.photo_resolution is not None:
+            time.sleep(1)  #  Need a chance for dashcam to settle...
             yi.set_config(Option.photo_resolution,
                           PhotoResolution[args.photo_resolution])
         yi.take_photo()
@@ -106,7 +109,6 @@ with YIDashcam() as yi:
             for data in yi.get_file(photo):
                 output_file.write(data)
         print("Snapshot saved to: {}".format(output_filename))
-    elif args.command == "webapp":
-        from .webapp import app
-        app.yi = yi
-        app.run()
+elif args.command == "webapp":
+    from .webapp import app
+    app.run()

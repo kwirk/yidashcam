@@ -1,17 +1,24 @@
 #!/usr/bin/env python
 
 from math import ceil
+from operator import attrgetter
 import time
 
-from flask import Flask, Response, abort, render_template, request, url_for
+from flask import Flask, Response, abort, render_template, redirect, request, \
+    url_for
+from flask_bootstrap import Bootstrap
 
-import yidashcam
+from . import Mode, YIDashcam, YIDashcamException, \
+    YIDashcamConnectionException, YIDashcamFileException
+from .config import option_map
 
-app = Flask(__name__)
+app = Flask(__name__.split(".")[0])
+Bootstrap(app)
+app.config['BOOTSTRAP_SERVE_LOCAL'] = True
 yi = None
 
 
-class Pagination(object):
+class Pagination():
     """Derived from http://flask.pocoo.org/snippets/44/"""
 
     def __init__(self, page, per_page, total_count):
@@ -23,7 +30,7 @@ class Pagination(object):
 
     @property
     def pages(self):
-        return ceil(self.total_count / self.per_page)
+        return ceil(self.total_count / self.per_page) or 1
 
     @property
     def has_prev(self):
@@ -59,46 +66,73 @@ def url_for_other_page(page):
 app.jinja_env.globals['url_for_other_page'] = url_for_other_page
 
 
-@app.before_first_request
-def connect_yi():
+def get_yi():
     global yi
     if yi is None:
-        yi = yidashcam.YIDashcam(mode=yidashcam.Mode.file)
-    elif yi.mode != yidashcam.Mode.file:
-        yi.set_mode(yidashcam.Mode.file)
-
-
-def get_yi():
-    if not yi.connected:
-        yi.connect(mode=yidashcam.Mode.file)
+        yi = YIDashcam(mode=Mode.file)
+    elif not yi.connected:
+        yi.connect(mode=Mode.file)
+    elif yi.mode != Mode.file:
+        yi.set_mode(Mode.file)
     return yi
 
 
-@app.errorhandler(yidashcam.YIDashcamConnectionException)
+@app.errorhandler(404)
+def error_404_handler(error):
+    return render_template("error.html", message=error), 404
+
+
+@app.errorhandler(500)
+def error_500_handler(error):
+    return render_template("error.html", message=error), 500
+
+
+@app.errorhandler(YIDashcamException)
+def yi_handler(error):
+    return render_template(
+        "error.html", message="Error Interfacing With YI Dashcam"), 500
+
+
+@app.errorhandler(YIDashcamConnectionException)
 def yi_connection_handler(error):
-    return "Failed to connect to YI Dashcam", 500
+    return render_template(
+        "error.html", message="Failed To Connect To YI Dashcam"), 500
 
 
-@app.errorhandler(yidashcam.YIDashcamFileException)
+@app.errorhandler(YIDashcamFileException)
 def yi_file_handler(error):
-    return "File not found on YI Dashcam", 404
+    return render_template(
+        "error.html", message="File Not Found On YI Dashcam"), 404
 
 
-@app.route('/', defaults={'file_type': 'emergency', 'page': 1})
+@app.context_processor
+def yi_context():
+    serial_number = yi.serial_number if yi is not None else None
+    firmware_version = yi.firmware_version if yi is not None else None
+    return {'firmware_version': firmware_version,
+            'serial_number': serial_number}
+
+
+@app.route('/')
+def index():
+    return redirect(url_for('file_list_page', file_type="emergency"))
+
+
 @app.route('/<file_type>/', defaults={'page': 1})
 @app.route('/<file_type>/<int:page>')
 def file_list_page(file_type, page):
     try:
-        file_list = getattr(get_yi(), '{}_list'.format(file_type), None)
+        file_list = getattr(get_yi(), '{}_list'.format(file_type))
     except AttributeError:
         abort(404)
+    file_list_len = len(file_list) if file_list is not None else 1
     try:
-        pagination = Pagination(page, 20, len(file_list))
+        pagination = Pagination(page, 20, file_list_len)
     except ValueError:
         # Bad page number
         abort(404)
 
-    file_list.sort(reverse=True)
+    file_list.sort(key=attrgetter('time'), reverse=True)
     return render_template(
         'file_list.html',
         file_type=file_type,
@@ -115,20 +149,29 @@ def thumbnail(path):
         mimetype='image/jpeg')
 
 
-@app.route('/config', methods=["GET", "POST"])
-def config():
+@app.route('/delete/<path:path>', methods=["POST"])
+def delete(path):
+    """Delete file from dashcam"""
+    path = "A:\\{}".format(path.replace('/', '\\'))
+    get_yi().delete_file(path, force=True)
+    return redirect(
+        request.referrer or url_for(
+            'file_list_page', file_type="emergency"))
+
+
+@app.route('/settings', methods=["GET", "POST"])
+def settings():
     """Page to interact with dashcam config"""
     if request.method == "POST":
-        cur_config = get_yi().config
-        for option, type_ in yidashcam.config.option_map.items():
+        yi = get_yi()
+        cur_config = yi.config
+        for option, type_ in option_map.items():
             if type_ is str:
                 continue
             value = int(request.form.get(option.name, 0))
             if value != cur_config[option]:
-                get_yi().set_config(option, value)
-        get_yi().set_mode(yidashcam.Mode.file)
-        time.sleep(0.5) # Allow settings to settle in
+                yi.set_config(option, value)
+        yi.set_mode(Mode.file)
+        time.sleep(0.5)  # Allow settings to settle in
     return render_template(
-        'config.html',
-        config=get_yi().config,
-        option_map=yidashcam.config.option_map)
+        'settings.html', settings=get_yi().config, option_map=option_map)

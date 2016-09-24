@@ -284,7 +284,7 @@ class YIDashcam():
         if self.mode != Mode.video:
             # Must be in "video" mode to change (most) config options
             self.set_mode(Mode.video)
-            time.sleep(2) # Camera has to settle into mode...
+            time.sleep(2)  # Camera has to settle into mode...
         while self.recording:
             self.stop_record()
             time.sleep(0.1)

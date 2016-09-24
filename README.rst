@@ -18,15 +18,50 @@ The main library requires:
 
 The web application requires:
 
-* Flask_
+* Flask-Bootstrap_
 
 
-.. _Flask: http://flask.pocoo.org/
+.. _Flask-Bootstrap: https://pythonhosted.org/Flask-Bootstrap/
 
 Usage
 =====
-To use, you must connect to your dash camera via WiFi first.
+To use any of the below, you must connect to your dash camera via WiFi first.
 
+Web Application
+---------------
+To use the web application, run: ``python -m yidashcam webapp`` (requires
+Flask-Bootstrap_). This hosts a local web app accessible via your web browser,
+allowing browsing of the dashcam's stored video and modification of the
+dashcam's settings.
+
+.. figure:: doc/file_list.png
+    :width: 80 %
+    :align: center
+
+    Sample screenshot of file list page
+
+
+.. figure:: doc/settings.png
+    :width: 80 %
+    :align: center
+
+    Sample screenshot of settings page
+
+
+Command Line
+------------
+There are three command line based tools:
+
+* ``python -m yidashcam config`` displays the current dashcam settings and
+  allows changing of these settings.
+* ``python -m yidashcam stream`` puts the dashcam in a mode to allow live
+  streaming from the dash camera.
+* ``python -m yidashcam snapshot`` takes a photo with the dashcam and saves it
+  in current directory or specified file.
+
+
+Library
+-------
 An example of using `yidashcam` (sync emergency clips to current folder):
 
 .. code-block:: python
@@ -58,18 +93,6 @@ the current folder):
         with open(photo.name, 'wb') as local_file:
             for data in yi.get_file(photo):
                 local_file.write(data)
-
-
-Also included is four applications:
-
-* ``python -m yidashcam config`` displays the current dashcam settings and
-  allows changing of these settings.
-* ``python -m yidashcam stream`` puts the dashcam in a mode to allow live
-  streaming from the dash camera.
-* ``python -m yidashcam snapshot`` takes a photo with the dashcam and saves it
-  in current directory or specified file.
-* ``python -m yidashcam webapp`` hosts a local web app to allow browsing of
-  dashcam's stored video (requires Flask_).
 
 
 License
