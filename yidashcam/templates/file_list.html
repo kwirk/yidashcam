@@ -43,6 +43,13 @@
             <a href="http://192.168.1.254{{ file.url_path|urlencode }}"><img src="/thumbnail{{ file.url_path|urlencode }}"/></a>
             <div class="thumbnail_delete">
                 <form action="/delete{{file.url_path|urlencode }}" method="post" onsubmit="return confirm('Are you sure you want to delete this file?')">
+                    <input type="hidden" name="next" value=
+                    {%- if pagination.page > 1 and file_list|length == 1 -%}
+                    "/{{ file_type }}/{{ pagination.page - 1 }}"
+                    {%- else -%}
+                    "{{ request.path }}"
+                    {%- endif -%}
+                    >
                     <button class="delete_submit" type="submit"><span class="glyphicon glyphicon-remove-circle" style="color:crimson"></span></button>
                 </form>
             </div>

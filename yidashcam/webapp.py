@@ -154,9 +154,7 @@ def delete(path):
     """Delete file from dashcam"""
     path = "A:\\{}".format(path.replace('/', '\\'))
     get_yi().delete_file(path, force=True)
-    return redirect(
-        request.referrer or url_for(
-            'file_list_page', file_type="emergency"))
+    return redirect(request.form.get("next", request.referrer), code=303)
 
 
 @app.route('/settings', methods=["GET", "POST"])
@@ -173,5 +171,7 @@ def settings():
                 yi.set_config(option, value)
         yi.set_mode(Mode.file)
         time.sleep(0.5)  # Allow settings to settle in
-    return render_template(
-        'settings.html', settings=get_yi().config, option_map=option_map)
+        return redirect(url_for('settings'), code=303)
+    else:
+        return render_template(
+            'settings.html', settings=get_yi().config, option_map=option_map)
