@@ -2,8 +2,6 @@ from setuptools import setup, find_packages
 from codecs import open
 from os import path
 
-from yidashcam import __version__ as version
-
 here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the README file
@@ -12,7 +10,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='yidashcam',
-    version=version,
+    version='0.6.2',
     description='An unofficial python library for interfacing with the Xiaomi YI Dash Cam.',
     long_description=long_description,
     url='https://github.com/kwirk/yidashcam',
