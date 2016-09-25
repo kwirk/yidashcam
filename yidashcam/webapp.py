@@ -107,10 +107,11 @@ def yi_file_handler(error):
 
 @app.context_processor
 def yi_context():
-    serial_number = yi.serial_number if yi is not None else None
-    firmware_version = yi.firmware_version if yi is not None else None
-    return {'firmware_version': firmware_version,
-            'serial_number': serial_number}
+    context = {}
+    if yi is not None and yi.connected:
+        context['serial_number'] = yi.serial_number
+        context['firmware_version'] = yi.firmware_version
+    return context
 
 
 @app.route('/')
