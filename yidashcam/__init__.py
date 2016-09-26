@@ -161,7 +161,7 @@ class YIDashcam():
         """Send periodic heartbeat to dashcam"""
         try:
             self._heartbeat_sock.sendall(b"02:001:0")
-        except socket.timeout:
+        except OSError:
             _LOG.debug("Heartbeat failed", exc_info=True)
             self._heartbeat_timer = None
             self._mode = None
