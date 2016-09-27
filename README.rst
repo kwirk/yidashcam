@@ -16,12 +16,21 @@ The main library requires:
 * `Requests <http://docs.python-requests.org/en/master/>`_
 
 
-The web application requires:
+The web application requires (optional):
 
 * Flask-Bootstrap_
 
 
 .. _Flask-Bootstrap: https://pythonhosted.org/Flask-Bootstrap/
+
+Installation
+============
+This library can be installed from PyPI by simply using:
+
+.. code-block:: bash
+
+   python -m pip install yidashcam
+
 
 Usage
 =====
