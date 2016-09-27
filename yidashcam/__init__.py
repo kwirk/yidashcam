@@ -84,12 +84,12 @@ class YIDashcam():
     """Class to interact with Xiaomi YI Dashcam"""
     HOST = "192.168.1.254"
 
-    def __init__(self, connect=True, mode=Mode.video):
+    def __init__(self, mode=Mode.video):
         self._config = None
         self._file_list = None
         self._mode = None
         self._heartbeat_timer = None
-        if connect:
+        if mode is not None:
             self.connect(mode)
 
     def __del__(self):

@@ -111,6 +111,6 @@ elif args.command == "snapshot":
         print("Snapshot saved to: {}".format(output_filename))
 elif args.command == "webapp":
     from . import webapp
-    with YIDashcam(connect=False) as yi:
+    with YIDashcam(None) as yi:
         webapp.yi = yi
         webapp.app.run()

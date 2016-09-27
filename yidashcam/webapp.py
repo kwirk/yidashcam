@@ -69,7 +69,7 @@ app.jinja_env.globals['url_for_other_page'] = url_for_other_page
 def get_yi():
     global yi
     if yi is None:
-        yi = YIDashcam(mode=Mode.file)
+        yi = YIDashcam(Mode.file)
     elif not yi.connected:
         yi.connect(mode=Mode.file)
     elif yi.mode != Mode.file:
