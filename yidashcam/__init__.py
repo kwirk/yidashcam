@@ -182,8 +182,7 @@ class YIDashcam():
 
     def set_mode(self, mode):
         """Enter dashcam mode"""
-        if mode not in Mode:
-            raise ValueError("Invalid mode")
+        mode = Mode(mode)
         try:
             self._send_cmd(Command.mode, par=mode)
         except YIDashcamException as err:
@@ -196,8 +195,7 @@ class YIDashcam():
         """Connect to dashcam"""
         if self.connected:
             raise YIDashcamException("Already connected")
-        if mode not in Mode:
-            raise ValueError("Invalid mode")
+        mode = Mode(mode)
 
         try:
             self._send_cmd(Command.connect)
