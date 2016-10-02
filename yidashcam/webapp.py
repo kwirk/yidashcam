@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from math import ceil
 from operator import attrgetter
 import time
@@ -163,13 +161,10 @@ def settings():
     """Page to interact with dashcam config"""
     if request.method == "POST":
         yi = get_yi()
-        cur_config = yi.config
-        for option, type_ in option_map.items():
-            if type_ is str:
-                continue
-            value = int(request.form.get(option.name, 0))
-            if value != cur_config[option]:
-                yi.set_config(option, value)
+        for option, cur_value in yi.config.items():
+            new_value = request.form.get(option.name, None)
+            if new_value is not None and int(new_value) != cur_value:
+                yi.set_config(option, int(new_value))
         yi.set_mode(Mode.file)
         time.sleep(0.5)  # Allow settings to settle in
         return redirect(url_for('settings'), code=303)
