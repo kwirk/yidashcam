@@ -10,7 +10,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='yidashcam',
-    version='0.6.2',
+    version='0.7',
     description='An unofficial python library for interfacing with the Xiaomi YI Dash Cam.',
     long_description=long_description,
     url='https://github.com/kwirk/yidashcam',
