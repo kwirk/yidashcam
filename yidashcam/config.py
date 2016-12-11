@@ -29,6 +29,7 @@ class Option(enum.IntEnum):
     adas = 2031
     audio = 2007
     button_sound = 3041
+    driving_report = 3044
     exposure = 2005
     firmware_version = 3012
     gsensor = 2011
@@ -137,6 +138,7 @@ option_map = {
     Option.adas: bool,
     Option.audio: bool,
     Option.button_sound: bool,
+    Option.driving_report: bool,
     Option.exposure: Exposure,
     Option.firmware_version: str,
     Option.gsensor: GSensor,
