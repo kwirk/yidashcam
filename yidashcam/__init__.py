@@ -7,6 +7,7 @@ import datetime
 import enum
 import logging
 import ntpath
+import re
 import socket
 import threading
 import time
@@ -373,12 +374,22 @@ class YIDashcam():
             path = path.path
         except AttributeError:
             pass
-        if force:
-            # Force delete for emergency files
-            self._send_cmd(Command.file_force_delete, str=path)
-        else:
-            self._send_cmd(Command.file_delete, str=path)
-        self._file_list = None  # Cache now wrong
+        try:
+            if force:
+                # Force delete for emergency files
+                self._send_cmd(Command.file_force_delete, str=path)
+            else:
+                self._send_cmd(Command.file_delete, str=path)
+
+            if "movie" in path.lower():
+                path = re.sub(r"^(.+movie)(.+)(\..{3})$","\\1_s\\2_s\\3", path,
+                              flags=re.IGNORECASE)
+                try:
+                    self._send_cmd(Command.file_delete, str=path)
+                except:
+                    pass
+        finally:
+            self._file_list = None  # Cache now wrong
 
     def take_photo(self):
         """Capture photo with camera"""
