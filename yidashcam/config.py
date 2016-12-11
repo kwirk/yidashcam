@@ -129,6 +129,7 @@ class VideoLength(enum.IntEnum):
 
 class VideoResolution(_ResolutionEnum):
     """Dashcam video resolutions"""
+    r1280x720p_30fps = 3
     r1920x1080p_30fps = 0
     r1920x1080p_60fps = 1
     r2304x1296p_30fps = 2
