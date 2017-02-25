@@ -1,7 +1,7 @@
 """Unofficial module for interacting with Xiaomi YI Dashcam"""
 
 __author__ = "Steven Hiscocks"
-__version__ = "0.7"
+__version__ = "0.8"
 
 import datetime
 import enum
