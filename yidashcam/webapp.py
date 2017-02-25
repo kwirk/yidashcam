@@ -132,10 +132,12 @@ def file_list_page(file_type, page):
         abort(404)
 
     file_list.sort(key=attrgetter('time'), reverse=True)
+    page_file_list = pagination.page_items(file_list)
     return render_template(
         'file_list.html',
         file_type=file_type,
-        file_list=pagination.page_items(file_list),
+        file_list=page_file_list,
+        file_dates={file_.time.date() for file_ in page_file_list},
         pagination=pagination)
 
 

@@ -31,14 +31,10 @@
     {%- if not file_list -%}
     <h1 class="text-center"><span class="glyphicon glyphicon-folder-open" style="color:crimson"></span><br>No {{ file_type|title|e }} Files Found</h1>
     {%- else -%}
-    {%- set prev_date = none %}
-    {%- for file in file_list %}
-        {%- if file.time.date() != prev_date %}
-            {%- if prev_date != none -%}</div>{%- endif -%}
-            {%- set prev_date = file.time.date() %}
-            <h3>{{ prev_date|e }}</h3>
-            <div class="row">
-        {%- endif %}
+    {%- for date in file_dates | sort(reverse=True) -%}
+        <h3>{{ date|e }}</h3>
+        <div class="row">
+    {%- for file in file_list if file.time.date() == date -%}
         <div class="col-xs-6 col-sm-4 col-md-3"><div class="thumbnail">
             <a href="http://192.168.1.254{{ file.url_path|urlencode }}"><img src="/thumbnail{{ file.url_path|urlencode }}"/></a>
             <div class="thumbnail_delete">
@@ -57,6 +53,7 @@
         </div></div>
     {%- endfor %}
     </div>
+    {%- endfor %}
 
     <div class="text-center"><ul class="pagination">
     {% if pagination.has_prev -%}
