@@ -72,7 +72,7 @@ if args.command is None or args.command == "config":
         if getattr(args, 'option', None) is not None:
             option = Option[args.option]
             val_type = option_map[option]
-            time.sleep(1)  #  Need a chance for dashcam to settle...
+            time.sleep(1.5)  #  Need a chance for dashcam to settle...
             if issubclass(val_type, enum.Enum):
                 yi.set_config(option, val_type[args.value])
             elif val_type is bool:
