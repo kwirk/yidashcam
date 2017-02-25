@@ -6,7 +6,7 @@ import enum
 import sys
 import time
 
-from . import __version__, YIDashcam
+from . import __version__, YIDashcam, YIDashcamException
 from .config import Option, option_map, PhotoResolution
 
 
@@ -88,9 +88,16 @@ if args.command is None or args.command == "config":
 elif args.command == "stream":
     with YIDashcam() as yi:
         print("Connect to video stream at: rtsp://{0.HOST}/xxx.mov".format(yi))
+        print("Press enter to take video photo, or Ctrl-C to exit")
         try:
             while yi.connected:
-                time.sleep(0.1)
+                input()
+                try:
+                    yi.take_video_photo()
+                except YIDashcamException as e:
+                    print("Error taking photo:", e)
+                else:
+                    print("Photo taken!")
         except KeyboardInterrupt:
             pass
 elif args.command == "snapshot":
