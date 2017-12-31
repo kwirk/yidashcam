@@ -83,13 +83,13 @@ class YIDashcamFile(
 
 class YIDashcam():
     """Class to interact with Xiaomi YI Dashcam"""
-    HOST = "192.168.1.254"
 
-    def __init__(self, mode=Mode.video):
+    def __init__(self, mode=Mode.video, *, host="192.168.1.254"):
         self._config = None
         self._file_list = None
         self._mode = None
         self._heartbeat_timer = None
+        self._host = host
         if mode is not None:
             self.connect(mode)
 
@@ -114,7 +114,7 @@ class YIDashcam():
         if par is not None:
             params['par'] = int(par)
         params.update(kwargs)
-        url = "http://{}/{}".format(self.HOST, path.lstrip("/"))
+        url = "http://{}/{}".format(self.host, path.lstrip("/"))
         try:
             res = requests.get(url, params=params, stream=stream, timeout=5)
             _LOG.debug("Sent dashcam command URL: %s", res.url)
@@ -172,6 +172,11 @@ class YIDashcam():
             self._heartbeat_timer.start()
 
     @property
+    def host(self):
+        """Dashcam host address"""
+        return self._host
+
+    @property
     def connected(self):
         """Status of connection to dashcam"""
         return self._mode is not None
@@ -208,7 +213,7 @@ class YIDashcam():
         self._heartbeat_sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY,
                                         1)
         self._heartbeat_sock.settimeout(10)
-        self._heartbeat_sock.connect((self.HOST, 3333))
+        self._heartbeat_sock.connect((self.host, 3333))
         YIDashcam.__send_heartbeat(weakref.proxy(self))
 
         self._config = None

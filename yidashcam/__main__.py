@@ -20,6 +20,10 @@ def format_config(option, value):
 parser = argparse.ArgumentParser(prog=YIDashcam.__module__)
 parser.add_argument(
     '--version', action='version', version='%(prog)s v{}'.format(__version__))
+parser.add_argument(
+    '--host',
+    default="192.168.1.254",
+    help="Host address of dashcam (default: 192.168.1.254)")
 subparsers = parser.add_subparsers(
     title="Commands", dest='command', metavar='COMMAND')
 
@@ -68,7 +72,7 @@ if "exposure" in sys.argv:
 args = parser.parse_args()
 
 if args.command is None or args.command == "config":
-    with YIDashcam() as yi:
+    with YIDashcam(host=args.host) as yi:
         if getattr(args, 'option', None) is not None:
             option = Option[args.option]
             val_type = option_map[option]
@@ -86,7 +90,7 @@ if args.command is None or args.command == "config":
                       yi.config.items(), key=lambda x: x[0].name)],
                 sep="\n")
 elif args.command == "stream":
-    with YIDashcam() as yi:
+    with YIDashcam(host=args.host) as yi:
         print("Connect to video stream at: rtsp://{0.HOST}/xxx.mov".format(yi))
         print("Press enter to take video photo, or Ctrl-C to exit")
         try:
@@ -101,7 +105,7 @@ elif args.command == "stream":
         except KeyboardInterrupt:
             pass
 elif args.command == "snapshot":
-    with YIDashcam() as yi:
+    with YIDashcam(host=args.host) as yi:
         if args.photo_resolution is not None:
             time.sleep(1)  #  Need a chance for dashcam to settle...
             yi.set_config(Option.photo_resolution,
@@ -118,6 +122,6 @@ elif args.command == "snapshot":
         print("Snapshot saved to: {}".format(output_filename))
 elif args.command == "webapp":
     from . import webapp
-    with YIDashcam(None) as yi:
+    with YIDashcam(None, host=args.host) as yi:
         webapp.yi = yi
         webapp.app.run()
